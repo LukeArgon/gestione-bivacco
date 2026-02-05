@@ -6,7 +6,6 @@ from datetime import datetime
 import time
 
 # --- 1. CONFIGURAZIONE ---
-# Ho rimosso l'icona della pagina
 st.set_page_config(page_title="Prenotazioni Bivacco", layout="wide")
 
 # PASSWORD
@@ -16,13 +15,50 @@ PASSWORD_STAFF = "coca"
 # TOTALE LETTI
 POSTI_LETTO_TOTALI = 70
 
-# LISTE GRUPPI
+# LISTE GRUPPI (Aggiornate con i nomi reali)
 GRUPPI = {
-    "Luna d'Argento": ["Bimbo A", "Bimbo B", "Bimbo C"], 
-    "Mario Re": ["Bimbo D", "Bimbo E"],
-    "Reparto": ["Marco", "Giulia", "Luca"],
-    "Noviziato": ["Andrea", "Chiara"],
-    "Clan": ["Rover 1", "Scolta 2"]
+    "Luna d'Argento": [
+        "Rebecca Tosato", "Margherita Ferrari", "Emma Crosio", "Maria Chiara Cavaliere",
+        "Costanza Crosio", "Caterina Dani", "Giacomo Dani", "Edoardo Vivalda",
+        "Bianca Benvenuto", "Alessia De Soricellis", "Francesca Secci", "Filippo Conte",
+        "Simone Calcagno", "Camilla Zerbi", "Fiorinda Andrianopoli", "Tommaso Moretti",
+        "Giovanni Moretti", "Tobia Lanaro", "Nicola Ferro", "Marcos De Castro",
+        "Irene Lucchesi", "Lucia Ramò", "Guglielmo Maranci", "Agata Ghiglione",
+        "Elena Zerbi", "Andrea Antoniotti", "Ulysse Floccari", "Ernesto Tenace Cipro",
+        "Lea Brugnolo", "Luca Calcagno", "Henry Valois Chinigò", "Gabriele Vitale"
+    ],
+    "Mario Re": [
+        "Carola Negri", "Adele Randi", "Jacopo Capuzzo", "Vasco Fedeli",
+        "Maximilian Barbieri", "Matilde Capuzzo", "Romeo Scapol", "Adelaide Gulmini",
+        "Bianca Morerio", "Giulio Bertelli", "Anna Verrico", "Liam Bajri",
+        "Zoe Anna Gandolfo", "Niccolò Gherardi", "Eleonora Gherardi", "Giulio Fedeli",
+        "Caterina De Scisciolo", "Matilda Balzarini", "Rocco Garibaldi", "Davide Dassori",
+        "Beatrice Randi", "Gianluca De Filippi", "Geremia Meazzi", "Jiun Predaroli",
+        "Trentini Beatrice", "Margherita De Scisciolo", "Giorgio Gulmini", "Viola Scapol",
+        "Leonardo Repola", "Lucia Negri"
+    ],
+    "Reparto": [
+        "Riccardo Carta", "Alessandro Vaggi", "Edoardo Arpe", "Matthias Barbieri",
+        "Giacomo Bertelli", "Mario Sansa", "Giovanni Zampini", "Emanuele De Vercelli",
+        "Carlo Alberto Tasso", "Terenui Maro", "Lorenzo Ferrari", "Riccardo Cardinale",
+        "Niccolò Tosato", "Michele Pilato", "Alessio Grigoli", "Lorenzo Romano",
+        "Alessandro Damasio", "Nicolò Repola", "Ferdinando Adrianopoli", "Leonardo Ghiglione",
+        "Liyon Nambumohottige Don Ruvinu", "Riccardo Vivalda", "Pietro De Castro",
+        "Jerish Suthagaran", "Anderson Ezequiel Ramirez Guardado", "Teresa Roatta",
+        "Agata Pinna", "Letizia Pizzuto", "Matilde Finamore", "Chiara Verrico",
+        "Agnese Pizzuto", "Lisa Cacciacarne", "Maria Cristina Tasso", "Beatrice Pilone",
+        "Benedetta Zampini", "Victoria Barbieri", "Benedetta Secci", "Rebecca Roatta",
+        "Lila Quattrino", "Guia Repola", "Petra Tagliarini", "Alice Grosso",
+        "Matilde Aronni", "Flora Lenzi", "Bianca Combi", "Sara De Castro"
+    ],
+    "Noviziato/Clan": [
+        "Viola Buscaglia", "Anna Demicheli", "Agnese Dighero", "Francesca Petruzzelli",
+        "Francesca Pilato", "Cristiano Rabagliati", "Francesco Torre", "Paolo Aragone",
+        "Davide Mario Capurro", "Fabio Cavaliere", "Francesco Crosio", "Adele Cacciacarne",
+        "Matteo Castro", "Pietro Parodi", "Lorenzo Piaggio", "Simone Albertella",
+        "Emanuele Pilone", "Anita Bilanci", "Maddalena Roatta", "Giacomo De Vercelli",
+        "Luca Colonnello", "Federico Crocco Rossetti"
+    ]
 }
 
 # --- 2. LOGIN ---
@@ -70,7 +106,6 @@ if menu == "Prenotazione":
     st.title("Prenotazione bivacco di gruppo")
     st.subheader("9/10 maggio 2026 - Base scout il Rostiolo, Vara")
     
-    # Pulsante Google Maps pulito
     st.link_button("Vedi posizione su Google Maps", "https://maps.app.goo.gl/df3NHq2cC9QfrESk7")
     
     st.markdown("---")
