@@ -69,7 +69,6 @@ if menu == "📝 Prenotazione":
     st.title("⛺ Prenotazione bivacco di gruppo")
     st.subheader("9/10 maggio 2026 - Base scout il Rostiolo, Vara")
     
-    # Link Google Maps
     st.markdown("[📍 Vedi posizione su Google Maps](https://maps.app.goo.gl/df3NHq2cC9QfrESk7)")
     
     st.markdown("---")
@@ -102,12 +101,12 @@ if menu == "📝 Prenotazione":
             st.error("⚠️ Inserisci il nome di riferimento!")
             return
         
-        # LOGICA CORREZIONE DOMENICA
+        # LOGICA DOMENICA
         # Se hanno messo Domenica, forziamo la sistemazione a "Nessuna" anche se hanno cliccato altro
         msg_extra = ""
         if giorno == "Domenica":
             tipo_sis = "Nessuna (Solo Domenica)"
-            msg_extra = "🔴 Nota: Poiché arrivi Domenica, la prenotazione del posto letto è stata ignorata."
+            msg_extra = "🔴 Nota: Hai selezionato 'Domenica', quindi non è stato scalato nessun posto letto."
         
         row = [
             datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -120,9 +119,9 @@ if menu == "📝 Prenotazione":
         sheet.append_row(row)
         
         if msg_extra:
-            st.error(msg_extra) # Messaggio popup rosso richiesto
+            st.error(msg_extra) # Messaggio popup rosso
             
-        st.success("✅ PRENOTAZIONE AVVENUTA!")
+        st.success("✅ CONFERMA: La tua prenotazione è stata salvata correttamente!")
         st.balloons()
         time.sleep(3)
         st.rerun()
@@ -142,15 +141,16 @@ if menu == "📝 Prenotazione":
             c1, c2 = st.columns(2)
             arrivo = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True, key="arr_fam")
             
-            # Sistemazione (Sempre visibile per evitare bug grafici, ma con avviso)
+            # --- SEZIONE SISTEMAZIONE ---
             st.markdown("---")
-            st.markdown(":red[**🔴 ATTENZIONE: Se hai selezionato 'Domenica', IGNORA la scelta qui sotto.**]")
+            # MESSAGGIO CORRETTO
+            st.markdown(":red[**🔴 Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
             
             opts = ["Tenda"]
             if rimasti >= num_persone: opts.insert(0, "Letto")
             else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
             
-            sistemazione = c2.radio("Sistemazione", opts, key="sis_fam")
+            sistemazione = c2.radio("Sistemazione Preferita", opts, key="sis_fam")
 
             if st.form_submit_button("Conferma Prenotazione"):
                 salva_prenotazione(gruppo_scelto, riferimento, num_persone, arrivo, sistemazione)
@@ -166,15 +166,16 @@ if menu == "📝 Prenotazione":
             c1, c2 = st.columns(2)
             arrivo_ex = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True, key="arr_ex")
             
-            # Sistemazione
+            # --- SEZIONE SISTEMAZIONE ---
             st.markdown("---")
-            st.markdown(":red[**🔴 ATTENZIONE: Se hai selezionato 'Domenica', IGNORA la scelta qui sotto.**]")
+            # MESSAGGIO CORRETTO
+            st.markdown(":red[**🔴 Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
 
             opts_ex = ["Tenda"]
             if rimasti >= num_persone_ex: opts_ex.insert(0, "Letto")
             else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
             
-            sistemazione_ex = c2.radio("Sistemazione", opts_ex, key="sis_ex")
+            sistemazione_ex = c2.radio("Sistemazione Preferita", opts_ex, key="sis_ex")
             
             if st.form_submit_button("Conferma Prenotazione"):
                 salva_prenotazione("Capo/Ex-Scout/Amico", nome_manuale, num_persone_ex, arrivo_ex, sistemazione_ex)
