@@ -144,7 +144,7 @@ if menu == "📝 Prenotazione":
             # --- SEZIONE SISTEMAZIONE ---
             st.markdown("---")
             # MESSAGGIO CORRETTO
-            st.markdown(":red[**🔴 Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
+            st.markdown(":red[**Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
             
             opts = ["Tenda"]
             if rimasti >= num_persone: opts.insert(0, "Letto")
