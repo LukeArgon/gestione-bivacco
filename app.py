@@ -15,7 +15,7 @@ PASSWORD_STAFF = "coca"
 # TOTALE LETTI
 POSTI_LETTO_TOTALI = 70
 
-# LISTE GRUPPI (Aggiornate con i nomi reali)
+# LISTE GRUPPI COMPLETA
 GRUPPI = {
     "Luna d'Argento": [
         "Rebecca Tosato", "Margherita Ferrari", "Emma Crosio", "Maria Chiara Cavaliere",
@@ -164,55 +164,57 @@ if menu == "Prenotazione":
 
     # --- TAB 1: GENITORI ---
     with tab1:
-        with st.form("form_genitori"):
-            st.write("### Prenotazione Famiglie")
-            gruppo_scelto = st.selectbox("Gruppo del ragazzo/a", list(GRUPPI.keys()))
-            
-            riferimento = ""
-            if gruppo_scelto:
-                riferimento = st.selectbox("Nome del ragazzo/a", GRUPPI[gruppo_scelto])
-            
-            num_persone = st.number_input("Numero totale persone", min_value=1, value=1, key="n_fam")
-            
-            c1, c2 = st.columns(2)
-            arrivo = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True, key="arr_fam")
-            
-            # --- SEZIONE SISTEMAZIONE ---
-            st.markdown("---")
-            st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
-            
-            opts = ["Tenda"]
-            if rimasti >= num_persone: opts.insert(0, "Letto")
-            else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
-            
-            sistemazione = c2.radio("Sistemazione Preferita", opts, key="sis_fam")
+        st.write("### Prenotazione Famiglie")
+        
+        # Abbiamo rimosso st.form per permettere l'aggiornamento dinamico
+        col_g1, col_g2 = st.columns(2)
+        gruppo_scelto = col_g1.selectbox("Gruppo del ragazzo/a", list(GRUPPI.keys()))
+        
+        riferimento = ""
+        if gruppo_scelto:
+            # La lista si aggiorna subito quando cambi gruppo!
+            riferimento = col_g2.selectbox("Nome del ragazzo/a", GRUPPI[gruppo_scelto])
+        
+        num_persone = st.number_input("Numero totale persone", min_value=1, value=1, key="n_fam")
+        
+        c1, c2 = st.columns(2)
+        arrivo = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True, key="arr_fam")
+        
+        # --- SEZIONE SISTEMAZIONE ---
+        st.markdown("---")
+        st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
+        
+        opts = ["Tenda"]
+        if rimasti >= num_persone: opts.insert(0, "Letto")
+        else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
+        
+        sistemazione = c2.radio("Sistemazione Preferita", opts, key="sis_fam")
 
-            if st.form_submit_button("Conferma Prenotazione"):
-                salva_prenotazione(gruppo_scelto, riferimento, num_persone, arrivo, sistemazione)
+        if st.button("Conferma Prenotazione", key="btn_famiglia"):
+            salva_prenotazione(gruppo_scelto, riferimento, num_persone, arrivo, sistemazione)
 
     # --- TAB 2: CAPI / EX SCOUT / AMICI ---
     with tab2:
-        with st.form("form_esterni"):
-            st.write("### Prenotazione Capi, Amici & Ex Scout")
-            nome_manuale = st.text_input("Nome e Cognome")
-            
-            num_persone_ex = st.number_input("Numero totale persone", min_value=1, value=1, key="n_ex")
-            
-            c1, c2 = st.columns(2)
-            arrivo_ex = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True, key="arr_ex")
-            
-            # --- SEZIONE SISTEMAZIONE ---
-            st.markdown("---")
-            st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
+        st.write("### Prenotazione Capi, Amici & Ex Scout")
+        nome_manuale = st.text_input("Nome e Cognome")
+        
+        num_persone_ex = st.number_input("Numero totale persone", min_value=1, value=1, key="n_ex")
+        
+        c1, c2 = st.columns(2)
+        arrivo_ex = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True, key="arr_ex")
+        
+        # --- SEZIONE SISTEMAZIONE ---
+        st.markdown("---")
+        st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
 
-            opts_ex = ["Tenda"]
-            if rimasti >= num_persone_ex: opts_ex.insert(0, "Letto")
-            else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
-            
-            sistemazione_ex = c2.radio("Sistemazione Preferita", opts_ex, key="sis_ex")
-            
-            if st.form_submit_button("Conferma Prenotazione"):
-                salva_prenotazione("Capo/Ex-Scout/Amico", nome_manuale, num_persone_ex, arrivo_ex, sistemazione_ex)
+        opts_ex = ["Tenda"]
+        if rimasti >= num_persone_ex: opts_ex.insert(0, "Letto")
+        else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
+        
+        sistemazione_ex = c2.radio("Sistemazione Preferita", opts_ex, key="sis_ex")
+        
+        if st.button("Conferma Prenotazione", key="btn_amici"):
+            salva_prenotazione("Capo/Ex-Scout/Amico", nome_manuale, num_persone_ex, arrivo_ex, sistemazione_ex)
 
 elif menu == "Area Staff":
     st.title("Admin - Elenco Iscritti")
