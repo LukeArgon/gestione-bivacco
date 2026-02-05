@@ -156,4 +156,30 @@ if menu == "📝 Prenotazione":
             
             # LOGICA DOMENICA (ESTERNI)
             if arrivo_ex == "Sabato":
-                opts_ex =
+                opts_ex = ["Tenda"]
+                if rimasti >= num_persone_ex: opts_ex.insert(0, "Letto")
+                else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
+                
+                sistemazione_ex = c2.radio("Sistemazione", opts_ex, key="sis_ex")
+            else:
+                st.info("ℹ️ Chi arriva Domenica non necessita di posto letto.")
+                sistemazione_ex = "Nessuna (Solo Domenica)"
+            
+            if st.form_submit_button("Conferma Prenotazione"):
+                salva_prenotazione("Capo/Ex-Scout/Amico", nome_manuale, num_persone_ex, arrivo_ex, sistemazione_ex)
+
+elif menu == "🔐 Area Staff":
+    st.title("Admin - Elenco Iscritti")
+    pwd = st.sidebar.text_input("Password Staff", type="password")
+    
+    if pwd == PASSWORD_STAFF:
+        df = get_data()
+        if not df.empty:
+            st.dataframe(df)
+            
+            # Statistiche rapide
+            tot_persone = df['Numero Persone'].sum()
+            tot_letti = df[df["Sistemazione"] == "Letto"]["Numero Persone"].sum()
+            st.success(f"Totale presenze: {tot_persone} | Di cui in Letto: {tot_letti}")
+    else:
+        st.warning("Inserisci password staff.")
