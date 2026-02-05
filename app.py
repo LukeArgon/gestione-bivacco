@@ -8,11 +8,11 @@ import time
 # --- 1. CONFIGURAZIONE ---
 st.set_page_config(page_title="Prenotazioni Bivacco", page_icon="⛺", layout="wide")
 
-# PASSWORD AGGIORNATE
+# PASSWORD
 PASSWORD_EVENTO = "vara26" 
 PASSWORD_STAFF = "coca"
 
-# NUOVO TOTALE LETTI
+# TOTALE LETTI
 POSTI_LETTO_TOTALI = 70
 
 # LISTE GRUPPI
@@ -65,9 +65,13 @@ def get_data():
 menu = st.sidebar.radio("Menu", ["📝 Prenotazione", "🔐 Area Staff"])
 
 if menu == "📝 Prenotazione":
-    # TITOLI AGGIORNATI
+    # TITOLI E POSIZIONE
     st.title("⛺ Prenotazione bivacco di gruppo")
     st.subheader("9/10 maggio 2026 - Base scout il Rostiolo, Vara")
+    
+    # Link Google Maps
+    st.link_button("📍 Vedi posizione su Google Maps", "https://maps.app.goo.gl/df3NHq2cC9QfrESk7")
+    
     st.markdown("---")
     
     # --- CALCOLO POSTI RIMASTI ---
@@ -80,7 +84,6 @@ if menu == "📝 Prenotazione":
     if rimasti < 0: rimasti = 0
 
     # VISUALIZZAZIONE A DESTRA
-    # Usiamo 3 colonne: una grande vuota a sinistra, due piccole a destra per i numeri
     col_spacer, col_tot, col_disp = st.columns([6, 2, 2]) 
     
     with col_tot:
@@ -91,7 +94,6 @@ if menu == "📝 Prenotazione":
     st.markdown("---")
 
     # --- SCHEDE SEPARATE (TAB) ---
-    # Titolo tab aggiornato
     tab1, tab2 = st.tabs(["👪 Sono un Genitore", "⚜️ Sono Capo/Ex-scout/Amico"])
 
     # Funzione salvataggio unica
@@ -130,6 +132,7 @@ if menu == "📝 Prenotazione":
             arrivo = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True, key="arr_fam")
             
             # LOGICA DOMENICA (GENITORI)
+            # Se è Domenica, NON mostriamo il radio button della sistemazione
             if arrivo == "Sabato":
                 opts = ["Tenda"]
                 if rimasti >= num_persone: opts.insert(0, "Letto")
@@ -137,7 +140,8 @@ if menu == "📝 Prenotazione":
                 
                 sistemazione = c2.radio("Sistemazione", opts, key="sis_fam")
             else:
-                st.info("ℹ️ Chi arriva Domenica non necessita di posto letto.")
+                # Messaggio che sostituisce il menu di scelta
+                c2.info("📅 Arrivo Domenica: Nessun posto letto necessario.")
                 sistemazione = "Nessuna (Solo Domenica)"
 
             if st.form_submit_button("Conferma Prenotazione"):
@@ -162,7 +166,7 @@ if menu == "📝 Prenotazione":
                 
                 sistemazione_ex = c2.radio("Sistemazione", opts_ex, key="sis_ex")
             else:
-                st.info("ℹ️ Chi arriva Domenica non necessita di posto letto.")
+                c2.info("📅 Arrivo Domenica: Nessun posto letto necessario.")
                 sistemazione_ex = "Nessuna (Solo Domenica)"
             
             if st.form_submit_button("Conferma Prenotazione"):
