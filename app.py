@@ -5,26 +5,27 @@ from google.oauth2.service_account import Credentials
 from datetime import datetime
 
 # --- 1. CONFIGURAZIONE PAGINA ---
-st.set_page_config(page_title="Gestione Bivacco", page_icon="⛺", layout="wide")
+st.set_page_config(page_title="Prenotazioni Bivacco", page_icon="⛺", layout="wide")
 
-# PASSWORD PER ACCEDERE AL SITO (Generale per tutti)
+# PASSWORD
 PASSWORD_EVENTO = "fazzolettone2024" 
-
-# PASSWORD PER AREA STAFF (Solo capi)
 PASSWORD_STAFF = "capi123"
 
-# STRUTTURA GRUPPI
-# Ho aggiunto la categoria per gli esterni alla fine
+# POSTI LETTO TOTALI
+POSTI_LETTO_TOTALI = 60
+
+# LISTE GRUPPI (Modifica qui i nomi dei ragazzi)
+# Nota: La lista "Ex-scout o Non" la lasciamo vuota qui perché la gestiamo diversamente nel codice
 GRUPPI = {
-    "Reparto (11-16 anni)": ["Marco Rossi", "Giulia Bianchi", "Luca Verdi"],
-    "Branco (8-11 anni)": ["Sofia Neri", "Matteo Gialli"],
-    "Noviziato (16-17 anni)": ["Andrea Blu", "Chiara Viola"],
-    "Amici & Ex Scout ⚜️": ["Nessun riferimento (Partecipo da solo/a)"] 
+    "Luna d'Argento": ["Bimbo A", "Bimbo B", "Bimbo C"], 
+    "Mario Re": ["Bimbo D", "Bimbo E"],
+    "Reparto": ["Marco", "Giulia", "Luca"],
+    "Noviziato": ["Andrea", "Chiara"],
+    "Clan": ["Rover 1", "Scolta 2"],
+    "Ex-scout o Non": [] # Lasciare vuoto, gestito con casella di testo
 }
 
-POSTI_LETTO_TOTALI = 20
-
-# --- 2. SISTEMA DI LOGIN (PROTEZIONE SITO) ---
+# --- 2. LOGIN ---
 if "authenticated" not in st.session_state:
     st.session_state.authenticated = False
 
@@ -32,12 +33,12 @@ def check_password():
     if st.session_state.password_input == PASSWORD_EVENTO:
         st.session_state.authenticated = True
     else:
-        st.error("Password errata. Riprova.")
+        st.error("Password errata.")
 
 if not st.session_state.authenticated:
     st.title("🔒 Area Riservata Bivacco")
-    st.text_input("Inserisci la password dell'evento per entrare:", type="password", key="password_input", on_change=check_password)
-    st.stop() # Ferma il codice qui se non loggato
+    st.text_input("Password evento:", type="password", key="password_input", on_change=check_password)
+    st.stop()
 
 # --- 3. CONNESSIONE GOOGLE SHEETS ---
 @st.cache_resource
@@ -52,117 +53,117 @@ def connect_to_sheet():
 try:
     sheet = connect_to_sheet()
 except Exception as e:
-    st.error("Errore tecnico di connessione. Contatta lo staff.")
+    st.error(f"Errore di connessione: {e}")
     st.stop()
 
-# --- 4. FUNZIONI UTILI ---
 def get_data():
     return pd.DataFrame(sheet.get_all_records())
 
-# --- 5. INTERFACCIA PRINCIPALE (Visibile solo se loggati) ---
+# --- 4. INTERFACCIA ---
 menu = st.sidebar.radio("Menu", ["📝 Prenotazione", "🔐 Area Staff"])
 
 if menu == "📝 Prenotazione":
     st.title("⛺ Prenotazione Bivacco")
     
-    # Calcolo posti
+    # --- CALCOLO POSTI RIMASTI ---
     df = get_data()
-    if not df.empty and "Sistemazione" in df.columns:
-        occupati = len(df[df["Sistemazione"] == "Letto"])
-    else:
-        occupati = 0
-    rimasti = POSTI_LETTO_TOTALI - occupati
+    posti_occupati = 0
+    if not df.empty and "Sistemazione" in df.columns and "Numero Persone" in df.columns:
+        # Filtra solo chi ha scelto Letto
+        df_letti = df[df["Sistemazione"] == "Letto"]
+        # Converte la colonna in numeri (per sicurezza) e fa la somma
+        posti_occupati = pd.to_numeric(df_letti["Numero Persone"], errors='coerce').sum()
+    
+    rimasti = POSTI_LETTO_TOTALI - posti_occupati
+    
+    # Se il calcolo dà numeri strani (es. NaN), mettiamo 0
+    if pd.isna(rimasti): rimasti = POSTI_LETTO_TOTALI
 
-    # Contatori
     col1, col2 = st.columns(2)
-    col1.metric("Posti Letto Totali", POSTI_LETTO_TOTALI)
-    col2.metric("Disponibili ora", rimasti)
+    col1.metric("Totale Letti", POSTI_LETTO_TOTALI)
+    col2.metric("Letti Disponibili", int(rimasti))
     st.markdown("---")
 
+    # --- MODULO ---
     with st.form("prenotazione"):
-        st.subheader("I tuoi dati")
+        # 1. Scelta Gruppo
+        gruppo_scelto = st.selectbox("Seleziona", list(GRUPPI.keys()))
         
-        # Selezione Intelligente
-        gruppo = st.selectbox("A quale gruppo appartieni o sei collegato?", list(GRUPPI.keys()))
-        
-        # Se sono Amici/Ex Scout, mostriamo solo l'opzione unica, altrimenti la lista ragazzi
-        lista_nomi = GRUPPI[gruppo]
-        ragazzo = st.selectbox("Riferimento (Ragazzo/a o Se Stessi)", lista_nomi)
+        # 2. Scelta Riferimento (Dinamica)
+        if gruppo_scelto == "Ex-scout o Non":
+            # Se è ex-scout, scrive a mano
+            riferimento = st.text_input("Inserisci Nome di riferimento (es. Mario Rossi)")
+        else:
+            # Altrimenti sceglie dalla lista
+            riferimento = st.selectbox("Riferimento (Ragazzo/a)", GRUPPI[gruppo_scelto])
+            
+        # 3. Numero Persone
+        num_persone = st.number_input("Quante persone siete (incluso il riferimento)?", min_value=1, value=1, step=1)
         
         c1, c2 = st.columns(2)
-        nome = c1.text_input("Nome e Cognome Prenotato")
-        tel = c2.text_input("Telefono")
+        arrivo = c1.radio("Arrivo", ["Sabato", "Domenica"], horizontal=True)
         
-        c3, c4 = st.columns(2)
-        arrivo = c3.radio("Giorno Arrivo", ["Sabato", "Domenica"], horizontal=True)
-        
-        # Logica Letti
-        opts = ["Tenda (illimitati)"]
-        if rimasti > 0:
-            opts.insert(0, "Letto")
+        # 4. Sistemazione (Blocca Letto se pieni)
+        opzioni = ["Tenda"]
+        # Mostra l'opzione Letto solo se ci sono abbastanza posti per il gruppo inserito
+        if rimasti >= num_persone:
+            opzioni.insert(0, "Letto")
+        elif rimasti > 0:
+            st.warning(f"Sono rimasti solo {int(rimasti)} letti, ma voi siete in {num_persone}. Dovete scegliere Tenda o dividervi.")
         else:
-            st.warning("⚠️ I letti sono finiti! Puoi prenotare solo in tenda.")
+            st.warning("⚠️ Letti esauriti.")
             
-        sistemazione = c4.radio("Sistemazione", opts)
+        sistemazione = c2.radio("Sistemazione", opzioni)
         
         if st.form_submit_button("Conferma Prenotazione"):
-            if not nome or not tel:
-                st.error("Inserisci Nome e Telefono!")
+            if not riferimento:
+                st.error("Inserisci un nome di riferimento!")
             else:
+                # Prepara la riga ESATTA per le colonne del foglio Excel
                 row = [
-                    datetime.now().strftime("%Y-%m-%d %H:%M"),
-                    gruppo,
-                    ragazzo, # Sarà "Nessun riferimento" per gli amici
-                    nome,
-                    tel,
-                    arrivo,
-                    "Letto" if "Letto" in sistemazione else "Tenda",
-                    "NO"
+                    datetime.now().strftime("%Y-%m-%d %H:%M"), # Data
+                    gruppo_scelto,                             # Gruppo
+                    riferimento,                               # Riferimento
+                    num_persone,                               # Numero Persone
+                    arrivo,                                    # Arrivo
+                    "Letto" if "Letto" in sistemazione else "Tenda", # Sistemazione
+                    "NO"                                       # Presente
                 ]
                 sheet.append_row(row)
-                st.success("Prenotazione Salvata con successo!")
-                st.balloons()
+                st.success("Prenotazione salvata!")
                 st.rerun()
 
 elif menu == "🔐 Area Staff":
-    st.title("Admin & Presenze")
+    st.title("Gestione Presenze")
     pwd = st.sidebar.text_input("Password Staff", type="password")
     
     if pwd == PASSWORD_STAFF:
-        st.info("Gestione presenze attiva.")
-        
         df = get_data()
         if not df.empty:
-            # Filtro per vedere meglio
-            filtro = st.selectbox("Filtra visualizzazione", ["Tutti"] + list(GRUPPI.keys()))
+            st.write("Usa il filtro per vedere un gruppo specifico.")
+            filtro = st.selectbox("Filtra", ["Tutti"] + list(GRUPPI.keys()))
             
             df_view = df if filtro == "Tutti" else df[df["Gruppo"] == filtro]
-
+            
             edited_df = st.data_editor(
                 df_view,
                 column_config={
                     "Presente": st.column_config.CheckboxColumn("Presente?", default=False)
                 },
-                disabled=["Data", "Nome Prenotato"],
-                hide_index=True,
-                num_rows="dynamic"
+                disabled=["Data", "Gruppo", "Riferimento"],
+                hide_index=True
             )
             
-            if st.button("💾 SALVA SU EXCEL"):
-                # Attenzione: qui ricarichiamo tutto il dataset originale 
-                # e aggiorniamo solo le righe visualizzate se necessario, 
-                # ma per semplicità sovrascriviamo con la vista corrente se non filtrata,
-                # o gestiamo la logica complessa.
-                # PER SEMPLICITÀ (Visto il livello base):
-                # Se si usa il filtro, il salvataggio potrebbe essere parziale.
-                # Consiglio per ora: Salvare solo quando si visualizza "Tutti".
-                
-                if filtro != "Tutti":
-                    st.warning("⚠️ Per salvare le modifiche, seleziona 'Tutti' nel filtro sopra, verifica i dati e poi salva.")
-                else:
-                    lista_dati = [edited_df.columns.values.tolist()] + edited_df.values.tolist()
+            if st.button("💾 Salva Modifiche"):
+                # Per sicurezza, ricarica tutto e aggiorna
+                # Metodo semplificato: Pulisce e riscrive.
+                # Nota: Se usi i filtri, salva SOLO quando vedi "Tutti" per evitare di perdere righe nascoste.
+                if filtro == "Tutti":
+                    lista = [edited_df.columns.values.tolist()] + edited_df.values.tolist()
                     sheet.clear()
-                    sheet.update(lista_dati)
-                    st.success("Database aggiornato!")
+                    sheet.update(lista)
+                    st.success("Salvato!")
+                else:
+                    st.warning("Per salvare, seleziona 'Tutti' nel filtro.")
     else:
-        st.warning("Inserisci password staff per vedere i dati.")
+        st.warning("Password necessaria.")
