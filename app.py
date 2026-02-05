@@ -35,7 +35,7 @@ def check_password():
         st.error("Password errata.")
 
 if not st.session_state.authenticated:
-    st.title("Area Riservata")
+    st.title("🔒 Area Riservata")
     st.text_input("Inserisci la password dell'evento:", type="password", key="password_input", on_change=check_password)
     st.stop()
 
@@ -62,11 +62,11 @@ def get_data():
     return df
 
 # --- 4. INTERFACCIA ---
-menu = st.sidebar.radio("Menu", ["Prenotazione", "Area Staff"])
+menu = st.sidebar.radio("Menu", ["📝 Prenotazione", "🔐 Area Staff"])
 
 if menu == "📝 Prenotazione":
     # TITOLI E POSIZIONE
-    st.title("Prenotazione bivacco di gruppo")
+    st.title("⛺ Prenotazione bivacco di gruppo")
     st.subheader("9/10 maggio 2026 - Base scout il Rostiolo, Vara")
     
     # Link Google Maps
@@ -94,12 +94,12 @@ if menu == "📝 Prenotazione":
     st.markdown("---")
 
     # --- SCHEDE SEPARATE (TAB) ---
-    tab1, tab2 = st.tabs(["Sono un Genitore", "Sono Capo/Ex-scout/Amico"])
+    tab1, tab2 = st.tabs(["👪 Sono un Genitore", "⚜️ Sono Capo/Ex-scout/Amico"])
 
     # Funzione salvataggio unica
     def salva_prenotazione(gruppo, nome_rif, numero, giorno, tipo_sis):
         if not nome_rif:
-            st.error("Inserisci il nome di riferimento!")
+            st.error("⚠️ Inserisci il nome di riferimento!")
             return
         
         # LOGICA CORREZIONE DOMENICA
@@ -107,7 +107,7 @@ if menu == "📝 Prenotazione":
         msg_extra = ""
         if giorno == "Domenica":
             tipo_sis = "Nessuna (Solo Domenica)"
-            msg_extra = "Nota: Poiché arrivi Domenica, la prenotazione del posto letto è stata ignorata."
+            msg_extra = "🔴 Nota: Poiché arrivi Domenica, la prenotazione del posto letto è stata ignorata."
         
         row = [
             datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -122,7 +122,7 @@ if menu == "📝 Prenotazione":
         if msg_extra:
             st.error(msg_extra) # Messaggio popup rosso richiesto
             
-        st.success("PRENOTAZIONE AVVENUTA!")
+        st.success("✅ PRENOTAZIONE AVVENUTA!")
         st.balloons()
         time.sleep(3)
         st.rerun()
@@ -144,7 +144,7 @@ if menu == "📝 Prenotazione":
             
             # Sistemazione (Sempre visibile per evitare bug grafici, ma con avviso)
             st.markdown("---")
-            st.markdown(":red[**ATTENZIONE: Se hai selezionato 'Domenica', IGNORA la scelta qui sotto.**]")
+            st.markdown(":red[**🔴 ATTENZIONE: Se hai selezionato 'Domenica', IGNORA la scelta qui sotto.**]")
             
             opts = ["Tenda"]
             if rimasti >= num_persone: opts.insert(0, "Letto")
@@ -168,7 +168,7 @@ if menu == "📝 Prenotazione":
             
             # Sistemazione
             st.markdown("---")
-            st.markdown(":red[**ATTENZIONE: Se hai selezionato 'Domenica', IGNORA la scelta qui sotto.**]")
+            st.markdown(":red[**🔴 ATTENZIONE: Se hai selezionato 'Domenica', IGNORA la scelta qui sotto.**]")
 
             opts_ex = ["Tenda"]
             if rimasti >= num_persone_ex: opts_ex.insert(0, "Letto")
@@ -179,7 +179,7 @@ if menu == "📝 Prenotazione":
             if st.form_submit_button("Conferma Prenotazione"):
                 salva_prenotazione("Capo/Ex-Scout/Amico", nome_manuale, num_persone_ex, arrivo_ex, sistemazione_ex)
 
-elif menu == "Area Staff":
+elif menu == "🔐 Area Staff":
     st.title("Admin - Elenco Iscritti")
     pwd = st.sidebar.text_input("Password Staff", type="password")
     
