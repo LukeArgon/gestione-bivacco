@@ -69,7 +69,8 @@ if menu == "📝 Prenotazione":
     st.title("⛺ Prenotazione bivacco di gruppo")
     st.subheader("9/10 maggio 2026 - Base scout il Rostiolo, Vara")
     
-    st.markdown("[📍 Vedi posizione su Google Maps](https://maps.app.goo.gl/df3NHq2cC9QfrESk7)")
+    # MODIFICA QUI: Ora è un vero pulsante
+    st.link_button("📍 Vedi posizione su Google Maps", "https://maps.app.goo.gl/df3NHq2cC9QfrESk7")
     
     st.markdown("---")
     
@@ -102,7 +103,6 @@ if menu == "📝 Prenotazione":
             return
         
         # LOGICA DOMENICA
-        # Se hanno messo Domenica, forziamo la sistemazione a "Nessuna" anche se hanno cliccato altro
         msg_extra = ""
         if giorno == "Domenica":
             tipo_sis = "Nessuna (Solo Domenica)"
@@ -119,7 +119,7 @@ if menu == "📝 Prenotazione":
         sheet.append_row(row)
         
         if msg_extra:
-            st.error(msg_extra) # Messaggio popup rosso
+            st.error(msg_extra)
             
         st.success("✅ CONFERMA: La tua prenotazione è stata salvata correttamente!")
         st.balloons()
@@ -143,8 +143,7 @@ if menu == "📝 Prenotazione":
             
             # --- SEZIONE SISTEMAZIONE ---
             st.markdown("---")
-            # MESSAGGIO CORRETTO
-            st.markdown(":red[**Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
+            st.markdown(":red[**🔴 Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
             
             opts = ["Tenda"]
             if rimasti >= num_persone: opts.insert(0, "Letto")
@@ -168,8 +167,7 @@ if menu == "📝 Prenotazione":
             
             # --- SEZIONE SISTEMAZIONE ---
             st.markdown("---")
-            # MESSAGGIO CORRETTO
-            st.markdown(":red[**Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
+            st.markdown(":red[**🔴 Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
 
             opts_ex = ["Tenda"]
             if rimasti >= num_persone_ex: opts_ex.insert(0, "Letto")
