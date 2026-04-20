@@ -12,9 +12,6 @@ st.set_page_config(page_title="Prenotazioni Bivacco", layout="wide")
 PASSWORD_EVENTO = "vara26" 
 PASSWORD_STAFF = "coca"
 
-# TOTALE LETTI
-POSTI_LETTO_TOTALI = 70
-
 # LISTE GRUPPI COMPLETA
 GRUPPI = {
     "Luna d'Argento": [
@@ -109,25 +106,6 @@ if menu == "Prenotazione":
     st.link_button("Vedi posizione su Google Maps", "https://maps.app.goo.gl/df3NHq2cC9QfrESk7")
     
     st.markdown("---")
-    
-    # --- CALCOLO POSTI RIMASTI ---
-    df = get_data()
-    posti_occupati = 0
-    if not df.empty and "Sistemazione" in df.columns:
-        posti_occupati = df[df["Sistemazione"] == "Letto"]["Numero Persone"].sum()
-    
-    rimasti = POSTI_LETTO_TOTALI - posti_occupati
-    if rimasti < 0: rimasti = 0
-
-    # VISUALIZZAZIONE A DESTRA
-    col_spacer, col_tot, col_disp = st.columns([6, 2, 2]) 
-    
-    with col_tot:
-        st.metric("Totale Letti", POSTI_LETTO_TOTALI)
-    with col_disp:
-        st.metric("Letti Disponibili", int(rimasti))
-    
-    st.markdown("---")
 
     # --- SCHEDE SEPARATE (TAB) ---
     tab1, tab2 = st.tabs(["Sono un Genitore", "Sono Capo/Ex-scout/Amico"])
@@ -142,7 +120,7 @@ if menu == "Prenotazione":
         msg_extra = ""
         if giorno == "Domenica":
             tipo_sis = "Nessuna (Solo Domenica)"
-            msg_extra = "Nota: Hai selezionato 'Domenica', quindi non è stato scalato nessun posto letto."
+            msg_extra = "Nota: Hai selezionato 'Domenica', quindi non è prevista sistemazione notturna."
         
         row = [
             datetime.now().strftime("%Y-%m-%d %H:%M"),
@@ -166,13 +144,11 @@ if menu == "Prenotazione":
     with tab1:
         st.write("### Prenotazione Famiglie")
         
-        # Abbiamo rimosso st.form per permettere l'aggiornamento dinamico
         col_g1, col_g2 = st.columns(2)
         gruppo_scelto = col_g1.selectbox("Gruppo del ragazzo/a", list(GRUPPI.keys()))
         
         riferimento = ""
         if gruppo_scelto:
-            # La lista si aggiorna subito quando cambi gruppo!
             riferimento = col_g2.selectbox("Nome del ragazzo/a", GRUPPI[gruppo_scelto])
         
         num_persone = st.number_input("Numero totale persone", min_value=1, value=1, key="n_fam")
@@ -182,13 +158,10 @@ if menu == "Prenotazione":
         
         # --- SEZIONE SISTEMAZIONE ---
         st.markdown("---")
-        st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
+        st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, non è prevista sistemazione per la notte.**]")
         
-        opts = ["Tenda"]
-        if rimasti >= num_persone: opts.insert(0, "Letto")
-        else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
-        
-        sistemazione = c2.radio("Sistemazione Preferita", opts, key="sis_fam")
+        # L'unica opzione possibile ora è la tenda
+        sistemazione = c2.radio("Sistemazione Preferita", ["Tenda"], key="sis_fam")
 
         if st.button("Conferma Prenotazione", key="btn_famiglia"):
             salva_prenotazione(gruppo_scelto, riferimento, num_persone, arrivo, sistemazione)
@@ -205,13 +178,10 @@ if menu == "Prenotazione":
         
         # --- SEZIONE SISTEMAZIONE ---
         st.markdown("---")
-        st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, la scelta qui sotto non consumerà posti letto (verrai segnato presente per la giornata).**]")
+        st.markdown(":red[**ATTENZIONE: Se arrivi Domenica, non è prevista sistemazione per la notte.**]")
 
-        opts_ex = ["Tenda"]
-        if rimasti >= num_persone_ex: opts_ex.insert(0, "Letto")
-        else: st.warning(f"Rimasti solo {int(rimasti)} letti. Scegliete Tenda.")
-        
-        sistemazione_ex = c2.radio("Sistemazione Preferita", opts_ex, key="sis_ex")
+        # L'unica opzione possibile ora è la tenda
+        sistemazione_ex = c2.radio("Sistemazione Preferita", ["Tenda"], key="sis_ex")
         
         if st.button("Conferma Prenotazione", key="btn_amici"):
             salva_prenotazione("Capo/Ex-Scout/Amico", nome_manuale, num_persone_ex, arrivo_ex, sistemazione_ex)
@@ -225,9 +195,8 @@ elif menu == "Area Staff":
         if not df.empty:
             st.dataframe(df)
             
-            # Statistiche rapide
+            # Statistiche rapide: rimosso il conteggio dei letti
             tot_persone = df['Numero Persone'].sum()
-            tot_letti = df[df["Sistemazione"] == "Letto"]["Numero Persone"].sum()
-            st.success(f"Totale presenze: {tot_persone} | Di cui in Letto: {tot_letti}")
+            st.success(f"Totale presenze registrate: {tot_persone}")
     else:
         st.warning("Inserisci password staff.")
